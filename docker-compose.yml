@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  app:
+    build: ./
+    command: bash -c "flask --app order_app init-db && gunicorn -w 4 -b 0.0.0.0 'order_app:app'"
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - 5000:5000
+      - 8000:8000
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:4.4.6
+    hostname: mongo
+    environment:
+      - MONGO_INITDB_DATABASE=userdb
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+    ports:
+    - 27017:27017
