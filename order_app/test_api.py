@@ -28,7 +28,7 @@ def test_order_detail(client):
 
     assert isinstance(response.json["products"], list)
 
-    assert isinstance(response.json["products"][0], dict)    
+    assert isinstance(response.json["products"][0], dict)
 
     assert "id" in response.json["products"][0]
 
@@ -52,14 +52,17 @@ def test_average_product_count(client):
 
 
 def test_average_product_quantity(client):
-    response = client.get("/order/average-product-quantity/637f63fd21e2ab35ed015d9f")
+    response = client.get(
+        "/order/average-product-quantity/637f63fd21e2ab35ed015d9f")
 
-    assert response.json["average_of_products_in_orders"]['product'] == "Tomato"
+    assert response.json[
+        "average_of_products_in_orders"]['product'] == "Tomato"
 
-    assert isinstance(response.json["average_of_products_in_orders"]['average_quantity'], list)
+    assert isinstance(response.json[
+        "average_of_products_in_orders"]['average_quantity'], list)
 
 
-def test_average_product_quantity(client):
+def test_average_product_quantity_error(client):
     response = client.get("/order/average-product-quantity/xxxxx")
 
     assert response.status_code == 404

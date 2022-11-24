@@ -1,4 +1,3 @@
-from flask import request, jsonify, abort
 from mongoengine.errors import ValidationError
 
 from . import db
@@ -6,11 +5,10 @@ from . import db
 
 class Order(db.Document):
     """
-    Schema of an order. 
+    Schema of an order.
     """
     product_count = db.IntField()
     order_items = db.ListField(db.ReferenceField('OrderItem'))
-
 
     def to_json(self):
         return {"order_id": str(self.id),
@@ -21,10 +19,10 @@ class Order(db.Document):
     def create(cls, data):
         """
         Classmethod can be used to create Orded
-        
+
         params
         data: dict
-        
+
         sample data format --> {
                                 'products': [{'measurement': 'KG',
                                               'name': 'Apple',
@@ -69,8 +67,7 @@ class OrderItem(db.Document):
     quantity = db.FloatField()
 
     meta = {
-        'indexes':[('product', 'measurement', 'quantity')
-        ]
+        'indexes': [('product', 'measurement', 'quantity')]
     }
 
     def to_json(self):

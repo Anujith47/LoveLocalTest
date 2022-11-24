@@ -1,5 +1,5 @@
 from flask import (
-    Blueprint, request, jsonify, abort
+    Blueprint, jsonify, abort
 )
 from mongoengine.errors import ValidationError
 
@@ -30,7 +30,7 @@ def average_product_count():
     Returns the average of all the product counts of an order in the database
     """
     pipe = [
-        {"$group": {"_id":None, "average": {"$avg": "$product_count"}}}]
+        {"$group": {"_id": None, "average": {"$avg": "$product_count"}}}]
     try:
         average = round(next(Order.objects().aggregate(pipe))['average'], 2)
     except StopIteration:
@@ -54,7 +54,8 @@ def average_product_quantity(product_id):
             "average_quantity": []}
         pipe = [
             {"$match": {"product": product.id}},
-            {"$group": {"_id": "$measurement", "average": {"$avg": "$quantity"}}}]
+            {"$group": {
+                "_id": "$measurement", "average": {"$avg": "$quantity"}}}]
         results = OrderItem.objects().aggregate(pipe)
         for result in results:
             data["average_quantity"].append(

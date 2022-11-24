@@ -1,11 +1,10 @@
 import click
-from mongoengine.errors import ValidationError
 
-from .order import Order, OrderItem, Product
+from .order import Order
 from .default_data import DEFAULT_DATA
 
 
-def init_db():  
+def init_db():
     # check if there is any existing orders
     existing_orders = Order.objects.all().only('id')
     if existing_orders:

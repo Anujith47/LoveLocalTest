@@ -1,7 +1,6 @@
 import os
-import json
 
-from flask import Flask, request, jsonify
+from flask import Flask
 from flask_mongoengine import MongoEngine
 
 from .settings import (
