@@ -11,9 +11,6 @@ class Order(db.Document):
     product_count = db.IntField()
     order_items = db.ListField(db.ReferenceField('OrderItem'))
 
-    meta = {
-        'indexes':['product_count']
-    }
 
     def to_json(self):
         return {"order_id": str(self.id),
