@@ -4,7 +4,6 @@ from flask import (
 from mongoengine.errors import ValidationError
 
 from .schema import Order, OrderItem, Product
-from .settings import ITEMS_PER_PAGE
 
 
 bp = Blueprint('order', __name__, url_prefix='/order')
