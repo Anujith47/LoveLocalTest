@@ -3,43 +3,20 @@ from flask import (
 )
 from mongoengine.errors import ValidationError
 
+from .schema import Order, OrderItem, Product
+from .settings import ITEMS_PER_PAGE
 
-from . import db
 
 bp = Blueprint('order', __name__, url_prefix='/order')
 
 
-class Order(db.Document):
-    product_count = db.IntField()
-    order_items = db.ListField(db.ReferenceField('OrderItem'))
-
-    def to_json(self):
-        return {"order_id": str(self.id),
-                "product_count": self.product_count,
-                "products": [item.to_json() for item in self.order_items]}
-
-
-class OrderItem(db.Document):
-    product = db.ReferenceField('Product')
-    measurement = db.StringField()
-    quantity = db.FloatField()
-
-    def to_json(self):
-        return {"id": str(self.id),
-                "name": self.product.name,
-                "product_id": str(self.product.id),
-                "measurement": self.measurement,
-                "quantity": self.quantity}
-
-
-class Product(db.Document):
-    name = db.StringField(unique=True)
-
-
 @bp.route('/<order_id>', methods=('GET',))
 def order_detail(order_id):
+    """
+    Returns details of a single order
+    """
     try:
-        order = Order.objects.get(id=order_id).select_related()
+        order = Order.objects.get(id=order_id).select_related(2)
     except (ValidationError, Order.DoesNotExist):
         order = None
     if order:
@@ -50,10 +27,13 @@ def order_detail(order_id):
 
 @bp.route('/average-product-count', methods=('GET',))
 def average_product_count():
+    """
+    Returns the average of all the product counts of an order in the database
+    """
     pipe = [
         {"$group": {"_id":None, "average": {"$avg": "$product_count"}}}]
     try:
-        average = next(Order.objects().aggregate(pipe))['average']
+        average = round(next(Order.objects().aggregate(pipe))['average'], 2)
     except StopIteration:
         return abort(404, description='No orders with valid values')
     return jsonify({'average_of_products_in_orders': average})
@@ -61,10 +41,13 @@ def average_product_count():
 
 @bp.route('average-product-quantity/<product_id>', methods=('GET',))
 def average_product_quantity(product_id):
+    """
+    Returns the average quantity of all the orded items of a specific product
+    """
     try:
         product = Product.objects.get(id=product_id)
-    except (ValidationError, Order.DoesNotExist):
-        order = None
+    except (ValidationError, Product.DoesNotExist):
+        product = None
     if product:
         data = {
             "product": product.name,
@@ -75,7 +58,8 @@ def average_product_quantity(product_id):
             {"$group": {"_id": "$measurement", "average": {"$avg": "$quantity"}}}]
         results = OrderItem.objects().aggregate(pipe)
         for result in results:
-            data["average_quantity"].append({result["_id"]: result["average"]})
+            data["average_quantity"].append(
+                {result["_id"]: round(result["average"], 2)})
 
         return jsonify(data)
     else:
